@@ -6,6 +6,7 @@ from psycopg2 import extras
 env = Env()
 env.read_env()
 
+
 DBNAME = env('DBNAME')
 DBUSER = env('DBUSER')
 DBPASSWORD = env('DBPASSWORD')
