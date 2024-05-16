@@ -29,22 +29,51 @@ class PostgresConnection:
         self.__host = host
         self.__port = port
 
+    def fetch_one(self, query: str, data=None, factory=None, clean=False):
+        try:
+            with self.__connect_db(factory) as cur:
+                self.__execute(cur, query, data)
+                return self.__fetch(cur, clean)
+        except (Exception, psycopg2.Error) as error:
+            self.__error(error)
+
+    def fetch_all(self, query: str, data=None, factory=None):
+        try:
+            with self.__connect_db(factory) as cur:
+                self.__execute(cur, query, data)
+                return cur.fetchall()
+        except (Exception, psycopg2.Error) as error:
+            self.__error(error)
+
+    def update_query(self, query: str, data=None, message='OK'):
+        try:
+            with self.__connect_db() as cur:
+                self.__execute(cur, query, data)
+                print(message)
+        except (Exception, psycopg2.Error) as error:
+            self.__error(error)
+
     def __connect_db(self, factory: str = None):
-        connect = psycopg2.connect(
+        '''
+
+        :param factory:
+        :return: cursor
+        '''
+        conn = psycopg2.connect(
             dbname=self.__dbname,
             user=self.__user,
             password=self.__password,
             host=self.__host,
             port=self.__port
         )
-        connect.autocommit = True
+        conn.autocommit = True
 
         if factory == 'dict':
-            cur = connect.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         elif factory == 'list':
-            cur = connect.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         else:
-            cur = connect.cursor()
+            cur = conn.cursor()
 
         return cur
 
@@ -71,26 +100,3 @@ class PostgresConnection:
     def __error(error):
         print(error)
 
-    def fetch_one(self, query: str, data=None, factory=None, clean=False):
-        try:
-            with self.__connect_db(factory) as cur:
-                self.__execute(cur, query, data)
-                return self.__fetch(cur, clean)
-        except (Exception, psycopg2.Error) as error:
-            self.__error(error)
-
-    def fetch_all(self, query: str, data=None, factory=None):
-        try:
-            with self.__connect_db(factory) as cur:
-                self.__execute(cur, query, data)
-                return cur.fetchall()
-        except (Exception, psycopg2.Error) as error:
-            self.__error(error)
-
-    def update_query(self, query: str, data=None, message='OK'):
-        try:
-            with self.__connect_db() as cur:
-                self.__execute(cur, query, data)
-                print(message)
-        except (Exception, psycopg2.Error) as error:
-            self.__error(error)
