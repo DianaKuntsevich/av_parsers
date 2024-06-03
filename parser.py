@@ -24,7 +24,7 @@ class AutoDB(PostgresConnection):
     def save_data(self, data: list[Auto]) -> None:
         data = [astuple(i) for i in data]
         self.update_query('''WITH auto_id as (
-        INSERT INTO auto_aw
+        INSERT INTO car_app_auto
         (id_car,
         link,
         price_usd,
@@ -84,11 +84,11 @@ class AutoDB(PostgresConnection):
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
          %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
          %s, %s)
-        ON CONFLICT (id_car) DO UPDATE SET price_byn = excluded.price_byn, price_usd = excluded.price_usd
+        
         RETURNING id
         )
-        INSERT INTO image_auto(image, auto_id) VALUES (unnest(COALESCE(%s, ARRAY[]::text[])), (SELECT id FROM auto_id))
-        ON CONFLICT (image) DO NOTHING
+        INSERT INTO car_app_image (image, auto_id) VALUES (unnest(COALESCE(%s, ARRAY[]::text[])), (SELECT id FROM auto_id))
+        
         ''', data)
 
     def create_table(self):
